@@ -88,7 +88,7 @@ Python (pandas, NumPy, matplotlib) · HTML, CSS and SVG with vanilla JavaScript 
 
 - Neha Mariya Saji
 - Trinity Darbouze
-- Eunice Kinmade
+- Eunice Akinmade
 - Sifatun Noor
 
 ---
