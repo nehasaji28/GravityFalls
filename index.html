@@ -1,1 +1,489 @@
+<!doctype html><html><head><meta charset=utf8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><style>:root{color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}html{scroll-padding-top:env(safe-area-inset-top,0px)}body{margin:0;padding:0;font:14px -apple-system,BlinkMacSystemFont,sans-serif;background:#fff;color:#000}img{max-width:100%}[hidden]:not([hidden=until-found i]){display:none!important}</style></head><body>
+<title>Gravity in Motion</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:ital,wght@0,400;0,500;0,600;0,800;1,500&display=swap">
+<style>
+    /* Layout: one stage (SVG, 1000x560) with scene captions and a scene-chip transport underneath.
+       Single dark look on purpose, matching the team's Gravity Scale graphic. */
+    :root{
+      color-scheme: dark;
+      --navy:#0d2140;
+      --navy-2:#132a4d;
+      --navy-3:#1a3762;
+      --ink:#f3f5f9;
+      --muted:#a9b5c7;
+      --line:rgba(255,255,255,.32);
+      --yellow:#ffd23f;
+      --red:#e5383b;
+      --blue:#4f86c6;
+      --blue-deep:#2f6aa3;
+      --green:#7cc52a;
+      --ball:#f08a24;
+      --sans:"Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    html,body{background:var(--navy);color:var(--ink);margin:0}
+    body{font-family:var(--sans);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:24px 40px}
+    .wrap{max-width:1040px;margin:0 auto;display:grid;gap:18px}
+    header{display:grid;gap:6px}
+    h1{margin:0;font-size:clamp(28px,4.6vw,44px);font-weight:800;letter-spacing:.01em;text-transform:uppercase;text-wrap:balance}
+    .sub{color:var(--muted);margin:0;font-size:16px}
+    .stripe{display:flex;gap:2px;width:276px;max-width:60%}
+    .stripe i{flex:1;height:6px}
+    .stripe i:nth-child(1){background:var(--red)}.stripe i:nth-child(2){background:var(--yellow)}
+    .stripe i:nth-child(3){background:var(--blue-deep)}.stripe i:nth-child(4){background:var(--green)}
 
+    .stage{background:var(--navy-2);border-radius:14px;overflow:hidden}
+    .stage svg{display:block;width:100%;height:auto}
+
+    .caption{display:grid;grid-template-columns:minmax(0,1fr);gap:4px;min-height:132px}
+    .eyebrow{font-size:12px;font-weight:600;letter-spacing:.12em;text-transform:uppercase;color:var(--yellow)}
+    .caption h2{margin:0;font-size:24px;font-weight:800;text-wrap:balance}
+    .caption p{margin:0;max-width:68ch;color:var(--ink);font-size:16px}
+    .caption .note{color:var(--muted);font-size:13px;font-style:italic}
+
+    .transport{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+    .btn{font:600 14px var(--sans);color:var(--ink);background:var(--navy-3);border:1px solid var(--line);border-radius:999px;padding:8px 16px;cursor:pointer;min-width:44px}
+    .btn:hover{border-color:var(--yellow)}
+    .btn:focus-visible,.chip:focus-visible{outline:2px solid var(--yellow);outline-offset:2px}
+    .btn.primary{background:var(--yellow);color:var(--navy);border-color:var(--yellow);min-width:92px}
+    .chips{display:flex;flex:1 1 320px;gap:6px;min-width:0;max-width:100%}
+    .transport>*{min-width:0}
+    .chip{flex:1;min-width:0;position:relative;overflow:hidden;font:500 12px var(--sans);color:var(--muted);background:var(--navy-3);border:1px solid transparent;border-radius:8px;padding:8px 6px 10px;cursor:pointer;text-align:left;white-space:nowrap;text-overflow:ellipsis}
+    .chip b{display:block;font-weight:600;color:var(--ink);overflow:hidden;text-overflow:ellipsis}
+    .chip .fill{position:absolute;left:0;bottom:0;height:3px;width:0;background:var(--yellow)}
+    .chip[aria-current="true"]{border-color:var(--line)}
+    @media (max-width:560px){.chip span{display:none}.caption h2{font-size:20px}.caption p{font-size:15px}}
+
+    /* SVG classes */
+    .t{font-family:var(--sans);fill:var(--ink)}
+    .tm{font-family:var(--sans);fill:var(--muted)}
+    .ty{font-family:var(--sans);fill:var(--yellow)}
+    .tg{font-family:var(--sans);fill:var(--green)}
+    .tb{font-family:var(--sans);fill:var(--blue)}
+    .cl{fill:none;stroke:var(--line);stroke-width:2}
+</style>
+
+<div class="wrap">
+    <header>
+        <h1>Gravity, animated</h1>
+        <p class="sub">How much a player pulls the defense · 2026 season</p>
+        <div class="stripe" aria-hidden="true"><i></i><i></i><i></i><i></i></div>
+    </header>
+
+    <div class="stage">
+        <svg id="stage" viewBox="0 0 1000 560" role="img" aria-labelledby="capTitle">
+            <defs>
+                <linearGradient id="gV" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="0" stop-color="#e5383b"/><stop offset=".27" stop-color="#ffd23f"/>
+                    <stop offset=".636" stop-color="#8a9bb0"/><stop offset="1" stop-color="#2f6aa3"/>
+                </linearGradient>
+                <linearGradient id="gH" x1="0" y1="0" x2="1" y2="0">
+                    <stop offset="0" stop-color="#2f6aa3"/><stop offset=".3" stop-color="#5a8ac0"/>
+                    <stop offset=".364" stop-color="#8a9bb0"/><stop offset=".6" stop-color="#e3c74a"/>
+                    <stop offset=".73" stop-color="#ffd23f"/><stop offset="1" stop-color="#e5383b"/>
+                </linearGradient>
+                <radialGradient id="hot"><stop offset="0" stop-color="#ffd23f" stop-opacity=".9"/><stop offset="1" stop-color="#e5383b" stop-opacity="0"/></radialGradient>
+                <radialGradient id="cold"><stop offset="0" stop-color="#4f86c6" stop-opacity=".9"/><stop offset="1" stop-color="#2f6aa3" stop-opacity="0"/></radialGradient>
+                <marker id="arrowG" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7cc52a"/></marker>
+            </defs>
+            <g id="court"></g>
+            <g id="dyn"></g>
+        </svg>
+    </div>
+
+    <div class="caption" aria-live="polite">
+        <div class="eyebrow" id="capEye"></div>
+        <h2 id="capTitle"></h2>
+        <p id="capText"></p>
+        <p class="note" id="capNote"></p>
+    </div>
+
+    <div class="transport">
+        <button class="btn" id="prev" aria-label="Previous scene">◀</button>
+        <button class="btn primary" id="play">Pause</button>
+        <button class="btn" id="next" aria-label="Next scene">▶</button>
+        <div class="chips" id="chips"></div>
+    </div>
+</div>
+
+<script>
+    // ---------- data: gravity_scale.csv (players with 15+ games) ----------
+    const CSV = `Marina Mabrey,TOR,13.0,19.9
+    Sonia Citron,WAS,9.5,16.4
+    Rhyne Howard,ATL,8.4,18.0
+    Bridget Carleton,PDX,7.5,14.2
+    Kayla McBride,MIN,7.5,18.5
+    Kahleah Copper,PHX,7.2,21.6
+    Azzi Fudd,DAL,6.6,13.5
+    Sabrina Ionescu,NYL,5.6,14.3
+    Kelsey Mitchell,IND,5.5,24.4
+    Allisha Gray,ATL,5.2,19.2
+    Caitlin Clark,IND,4.9,21.5
+    A'ja Wilson,LVA,4.6,25.3
+    Paige Bueckers,DAL,3.9,20.5
+    Flau'jae Johnson,SEA,3.2,14.3
+    Marine Johannes,NYL,3.0,8.7
+    Jackie Young,LVA,2.8,17.8
+    Michaela Onyenwere,WAS,2.8,8.9
+    Ariel Atkins,LAS,2.4,8.5
+    Sophie Cunningham,IND,2.3,8.3
+    Rae Burrell,LAS,2.0,14.1
+    Janelle Salaun,GSV,2.0,12.9
+    Kaila Charles,GSV,1.9,6.1
+    Jewell Loyd,LVA,1.4,8.6
+    Gabby Williams,GSV,1.3,13.9
+    Arike Ogunbowale,DAL,1.3,15.3
+    DeWanna Bonner,ATL,1.0,10.6
+    Diamond Miller,CON,0.9,9.4
+    Courtney Williams,MIN,0.8,13.9
+    Jacy Sheldon,CHI,0.7,6.6
+    Natisha Hiedeman,SEA,0.6,15.2
+    Nneka Ogwumike,LAS,0.3,17.1
+    Kennedy Burke,CON,0.2,8.3
+    Charlisse Leger-Walker,CON,0.2,6.8
+    Awa Fam,SEA,0.1,10.7
+    Breanna Stewart,NYL,0.0,20.2
+    Noemie Brochant,PHX,-0.1,5.7
+    Kiki Iriafen,WAS,-0.3,15.0
+    Chelsea Gray,LVA,-0.4,12.0
+    Kamilla Cardoso,CHI,-0.4,14.6
+    Dominique Malonga,SEA,-0.7,17.4
+    Angel Reese,ATL,-0.8,15.9
+    Megan DiLeo,PDX,-0.9,13.0
+    Kayla Thornton,GSV,-1.0,7.5
+    Kiah Stokes,GSV,-1.5,3.6
+    NaLyssa Smith,LVA,-1.5,11.4
+    Maria Conde,TOR,-1.6,8.6
+    Shakira Austin,WAS,-1.6,16.4
+    Georgia Amoore,WAS,-2.1,6.7
+    Emily Engstler,PDX,-2.5,9.6
+    Jonquel Jones,NYL,-2.6,15.0
+    Veronica Burton,GSV,-2.6,11.9
+    Olivia Miles,MIN,-2.7,19.9
+    Pauline Astier,NYL,-2.8,8.3
+    Leila Lacan,CON,-3.6,11.2
+    Dearica Hamby,LAS,-4.1,14.6
+    Natasha Cloud,CHI,-4.1,11.1
+    Jade Melbourne,SEA,-4.1,9.6
+    Laura Juskaite,TOR,-4.3,9.8
+    Naz Hillmon,ATL,-4.4,9.5
+    Julie Allemand,TOR,-4.5,6.6
+    Carla Leite,PDX,-4.6,15.9
+    Saniya Rivers,CON,-4.9,6.8
+    Natasha Howard,MIN,-5.0,14.9
+    Erica Wheeler,LAS,-5.1,8.9
+    Nia Brodie,MIN,-5.2,6.4
+    Jessica Shepard,DAL,-5.3,14.4
+    Aliyah Boston,IND,-5.7,17.1
+    Alyssa Thomas,PHX,-6.5,13.7
+    Jordin Canada,ATL,-7.1,11.5`;
+    const P = CSV.trim().split("\n").map(l=>{const [n,t,g,p]=l.split(",");return {n,t,g:+g,p:+p};});
+
+    // linear fit: Gravity ~ PPG (same as make_visuals.py)
+    const fit = (()=>{const n=P.length,mx=P.reduce((s,d)=>s+d.p,0)/n,my=P.reduce((s,d)=>s+d.g,0)/n;
+      let sxy=0,sxx=0;P.forEach(d=>{sxy+=(d.p-mx)*(d.g-my);sxx+=(d.p-mx)**2});const m=sxy/sxx;return {m,b:my-m*mx};})();
+
+    // ---------- helpers ----------
+    const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+    const seg=(t,a,b)=>clamp((t-a)/(b-a));
+    const ease=t=>t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;
+    const lerp=(a,b,p)=>a+(b-a)*p;
+    const lp=(a,b,p)=>({x:lerp(a.x,b.x,p),y:lerp(a.y,b.y,p)});
+    const f1=v=>(v>0?"+":v<0?"−":"")+Math.abs(v).toFixed(1);
+    const esc=s=>s.replace(/&/g,"&amp;").replace(/</g,"&lt;");
+
+    function colorFor(g){
+      const st=[[-8,[47,106,163]],[0,[138,155,176]],[8,[255,210,63]],[14,[229,56,59]]];
+      for(let i=0;i<st.length-1;i++){const[a,ca]=st[i],[b,cb]=st[i+1];
+        if(g<=b||i===st.length-2){const p=clamp((g-a)/(b-a));return `rgb(${ca.map((c,k)=>Math.round(lerp(c,cb[k],p))).join(",")})`;}}
+    }
+
+    // ---------- court (wnba_court.py dimensions; feet -> px, basket at top) ----------
+    // x = feet toward the baseline (0 = half-court line, 47 = baseline), y = feet across (-25..25)
+    const K=10, SX=y=>500+y*K, SY=x=>540-x*K, S=pt=>[SX(pt.y),SY(pt.x)];
+    const HOOP={x:41.75,y:0};
+    const toward=(m,d)=>{const vx=HOOP.x-m.x,vy=HOOP.y-m.y,L=Math.hypot(vx,vy);return {x:m.x+vx/L*d,y:m.y+vy/L*d};};
+
+    function courtSVG(){
+      const cdx=Math.sqrt(22.146**2-21.654**2), cx=41.75-cdx;
+      return `
+      <rect x="250" y="70" width="500" height="470" fill="#102544" stroke="rgba(255,255,255,.45)" stroke-width="3"/>
+      <rect x="420" y="70" width="160" height="190" fill="#173563" class="cl"/>
+      <path class="cl" d="M440 260 A60 60 0 0 0 560 260"/>
+      <path class="cl" d="M440 260 A60 60 0 0 1 560 260" stroke-dasharray="8 8"/>
+      <path class="cl" d="M460 110 V122.5 A40 40 0 0 0 540 122.5 V110"/>
+      <line class="cl" x1="470" y1="110" x2="530" y2="110" stroke-width="4"/>
+      <circle class="cl" cx="500" cy="122.5" r="7.5" style="stroke:var(--ball);stroke-width:2.5"/>
+      <path class="cl" d="M${SX(-21.654)} 70 V${SY(cx)} A221.46 221.46 0 0 0 ${SX(21.654)} ${SY(cx)} V70"/>
+      <path class="cl" d="M440 540 A60 60 0 0 1 560 540"/>
+      <line class="cl" x1="250" y1="540" x2="750" y2="540"/>`;
+    }
+
+    // ---------- shared drawing pieces ----------
+    function gauge(v,label,sub){
+      const Y=g=>150+(14-g)/22*340;
+      const y=Y(v), col=v>=0?"var(--yellow)":"var(--blue)";
+      return `<g>
+        <text class="tm" x="110" y="66" text-anchor="middle" font-size="13" font-weight="600" letter-spacing="2">${label}</text>
+        <text x="110" y="112" text-anchor="middle" font-size="40" font-weight="800" style="fill:${col};font-family:var(--sans)" font-variant-numeric="tabular-nums">${f1(v)}</text>
+        <text class="tm" x="110" y="134" text-anchor="middle" font-size="13">${sub}</text>
+        <rect x="96" y="150" width="28" height="340" rx="14" fill="url(#gV)" opacity=".9"/>
+        ${[14,8,0,-8].map(g=>`<line x1="128" x2="136" y1="${Y(g)}" y2="${Y(g)}" stroke="var(--line)" stroke-width="2"/><text class="tm" x="142" y="${Y(g)+4}" font-size="12">${g>0?"+"+g:g}</text>`).join("")}
+        <path d="M78 ${y-9} L92 ${y} L78 ${y+9}z" fill="var(--ink)"/>
+        <line x1="92" x2="128" y1="${y}" y2="${y}" stroke="var(--ink)" stroke-width="3"/>
+      </g>`;
+    }
+    function legend(){
+      return `<g font-size="14">
+        <circle cx="790" cy="90" r="11" fill="#fff" stroke="var(--navy)" stroke-width="3"/><text class="t" x="810" y="95">Offense</text>
+        <circle cx="790" cy="122" r="11" fill="var(--blue)" stroke="#bcd3ef" stroke-width="2"/><text class="t" x="810" y="127">Defender</text>
+        <circle cx="790" cy="154" r="6" fill="var(--ball)"/><text class="t" x="810" y="159">Ball</text>
+        <circle cx="790" cy="188" r="14" fill="url(#hot)"/><text class="t" x="810" y="193">Pull on defense</text>
+        <text class="tm" x="772" y="520" font-size="12" font-style="italic">Diagram to explain the idea,</text>
+        <text class="tm" x="772" y="536" font-size="12" font-style="italic">not tracked game positions</text>
+      </g>`;
+    }
+    function glow(pt,g,p){
+      if(Math.abs(g)<.05) return "";
+      const [x,y]=S(pt), grad=g>0?"hot":"cold"; let s="";
+      for(let k=2;k>=0;k--){const r=16+Math.abs(g)/14*62*(k+1)/3*p; s+=`<circle cx="${x}" cy="${y}" r="${r}" fill="url(#${grad})" opacity="${.22}"/>`;}
+      return s;
+    }
+    function offense(pt,star,label){
+      const [x,y]=S(pt);
+      return `<circle cx="${x}" cy="${y}" r="${star?14:11}" fill="${star?"var(--yellow)":"#fff"}" stroke="var(--navy)" stroke-width="3"/>`+
+        (label?`<text class="t" x="${x}" y="${y+34}" text-anchor="middle" font-size="14" font-weight="600">${label}</text>`:"");
+    }
+    function defender(pt){const [x,y]=S(pt);return `<circle cx="${x}" cy="${y}" r="11" fill="var(--blue)" stroke="#bcd3ef" stroke-width="2"/>`;}
+    function ball(pt){const [x,y]=S(pt);return `<circle cx="${x+12}" cy="${y-12}" r="6.5" fill="var(--ball)" stroke="var(--navy)" stroke-width="1.5"/>`;}
+    function pill(pt,text,op,color="var(--green)",dx=0,dy=-30){
+      if(op<=0) return ""; const [x,y]=S(pt), w=text.length*7.6+18;
+      return `<g opacity="${op}"><rect x="${x+dx-w/2}" y="${y+dy-12}" width="${w}" height="22" rx="11" fill="${color}"/>
+        <text x="${x+dx}" y="${y+dy+3.5}" text-anchor="middle" font-size="12" font-weight="800" letter-spacing="1" style="fill:var(--navy);font-family:var(--sans)">${text}</text></g>`;
+    }
+    function pull(from,to,op){
+      if(op<=0) return ""; const [x1,y1]=S(from),[x2,y2]=S(to);
+      return `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="var(--yellow)" stroke-width="2" stroke-dasharray="5 6" opacity="${op}"/>`;
+    }
+
+    // ---------- scene 1: on-ball gravity ----------
+    const s1 = (()=>{
+      const O={S:{x:20,y:0},A:{x:30,y:-19},B:{x:30,y:19},C:{x:44.5,y:-22},D:{x:38,y:9}};
+      const D0={S:toward(O.S,4),A:toward(O.A,3.5),B:toward(O.B,3.5),C:toward(O.C,3.5),D:toward(O.D,3)};
+      const D1={S:toward(O.S,2),A:{x:27,y:-11},B:{x:27,y:11},C:{x:40.5,y:-15},D:{x:34,y:4}};
+      return t=>{
+        const p=ease(seg(t,1.2,4)), g=13.0*p; let h=glow(O.S,g,p);
+        for(const k of ["A","B","C","D"]) h+=pull(lp(D0[k],D1[k],p),O.S,p*.7);
+        for(const k in O) h+=offense(O[k],k==="S",k==="S"?"Shooter":"");
+        for(const k in D0) h+=defender(lp(D0[k],D1[k],p));
+        h+=ball(O.S);
+        const o=seg(t,4.4,5);
+        h+=pill(O.B,"OPEN",o)+pill(O.C,"OPEN",o,undefined,0,-30)+pill(O.D,"OPEN",seg(t,4.7,5.3),undefined,34,-26);
+        const c=seg(t,5.4,6);
+        if(c>0) h+=`<text class="ty" x="500" y="${SY(20)+66}" text-anchor="middle" font-size="16" font-weight="600" opacity="${c}">Four helpers lean toward her</text>`;
+        return gauge(g,"GRAVITY","on the ball")+legend()+h;
+      };
+    })();
+
+    // ---------- scene 2: off-ball gravity ----------
+    const s2 = (()=>{
+      const O={S:{x:30,y:19},A:{x:30,y:-19},B:{x:20,y:0},C:{x:44.5,y:-22},D:{x:40,y:9}};
+      const D0={A:toward(O.A,3),S:{x:34,y:5},B:{x:24,y:-4},C:{x:42,y:-17.5},D:toward(O.D,2)};
+      const D1={...D0,S:toward(O.S,2.4),B:{x:24.5,y:7}};
+      return t=>{
+        const p=ease(seg(t,1.4,4.2)), g=13.9*p; let h=glow(O.S,g,p);
+        h+=pull(lp(D0.B,D1.B,p),O.S,p*.7);
+        // driving lane arrow for the ball handler
+        const a=ease(seg(t,4.6,5.8));
+        if(a>0){const [x1,y1]=S(O.A),[x2,y2]=S(lp(O.A,{x:37,y:-4},a));
+          h+=`<line x1="${x1+8}" y1="${y1-8}" x2="${x2}" y2="${y2}" stroke="var(--green)" stroke-width="4" marker-end="url(#arrowG)"/>`;
+          h+=`<text class="tg" x="${SX(-19)}" y="${SY(30)+58}" text-anchor="middle" font-size="15" font-weight="600" opacity="${seg(t,5.4,6)}">Driving lane opens</text>`;}
+        for(const k in O) h+=offense(O[k],k==="S",k==="S"?"Shooter":k==="A"?"Driver":"");
+        for(const k in D0) h+=defender(lp(D0[k],D1[k],p));
+        h+=ball(O.A);
+        h+=pill(O.S,"NO BALL",seg(t,.3,.9),"var(--muted)",0,-30);
+        const c=seg(t,6.4,7);
+        if(c>0) h+=`<text class="ty" x="740" y="${SY(30)+84}" text-anchor="end" font-size="15" font-weight="600" opacity="${c}">Her defender won't leave her</text>`;
+        return gauge(g,"GRAVITY","off the ball")+legend()+h;
+      };
+    })();
+
+    // ---------- scene 3: negative gravity ----------
+    const s3 = (()=>{
+      const O={S:{x:21,y:0},A:{x:30,y:-19},B:{x:30,y:19},C:{x:44.5,y:-22},D:{x:38,y:9}};
+      const D0={S:toward(O.S,4),A:toward(O.A,3.5),B:toward(O.B,3.5),C:toward(O.C,3.5),D:toward(O.D,3)};
+      const D1={S:toward(O.S,9.5),A:toward(O.A,1.5),B:toward(O.B,1.5),C:toward(O.C,1.2),D:toward(O.D,1.3)};
+      return t=>{
+        const p=ease(seg(t,1.2,4)), g=-7.1*p; let h=glow(O.S,g,p);
+        const ds=lp(D0.S,D1.S,p), c=seg(t,4.4,5);
+        if(c>0){const [x1,y1]=S(O.S),[,y2]=S(ds);
+          h+=`<g opacity="${c}"><line x1="${x1+34}" x2="${x1+34}" y1="${y1-14}" y2="${y2+14}" stroke="var(--blue)" stroke-width="2"/>
+          <line x1="${x1+28}" x2="${x1+40}" y1="${y1-14}" y2="${y1-14}" stroke="var(--blue)" stroke-width="2"/>
+          <line x1="${x1+28}" x2="${x1+40}" y1="${y2+14}" y2="${y2+14}" stroke="var(--blue)" stroke-width="2"/>
+          <text class="tb" x="${x1+48}" y="${(y1+y2)/2+5}" font-size="15" font-weight="600">Defender sags off</text></g>`;}
+        for(const k in O) h+=offense(O[k],k==="S",k==="S"?"Ball handler":"");
+        for(const k in D0) h+=defender(lp(D0[k],D1[k],p));
+        h+=ball(O.S);
+        const c2=seg(t,5.3,5.9);
+        for(const k of ["A","B","C","D"]) h+=pill(O[k],"COVERED",c2,"var(--blue)",k==="D"?40:0,k==="D"?-24:-30);
+        return gauge(g,"GRAVITY","on the ball")+legend()+h;
+      };
+    })();
+
+    // ---------- scene 4: the gravity scale (all 69 players) ----------
+    const s4 = (()=>{
+      const X=g=>110+(g+8)/22*780;
+      const sorted=[...P].sort((a,b)=>a.g-b.g), bins={};
+      sorted.forEach(d=>{const k=Math.round(d.g*2)/2; d.stack=(bins[k]=(bins[k]||0)+1)-1;});
+      const HL={"Jordin Canada":160,"Breanna Stewart":110,"Sonia Citron":160,"Marina Mabrey":110};
+      return t=>{
+        let h=`<text class="tm" x="500" y="535" text-anchor="middle" font-size="14">Each dot is one player · 15+ games played</text>`;
+        h+=`<rect x="100" y="330" width="800" height="50" rx="25" fill="url(#gH)" stroke="rgba(255,255,255,.55)" stroke-width="2"/>`;
+        for(let g=-6;g<=14;g+=2) h+=`<line x1="${X(g)}" x2="${X(g)}" y1="384" y2="394" stroke="var(--line)" stroke-width="2"/><text class="tm" x="${X(g)}" y="414" text-anchor="middle" font-size="14">${g>0?"+"+g:g}</text>`;
+        h+=`<line x1="${X(0)}" x2="${X(0)}" y1="330" y2="380" stroke="#fff" stroke-width="2" opacity=".8"/>`;
+        h+=`<text class="tb" x="110" y="462" font-size="17" font-weight="600">◀ COLD · defense relaxes</text>`;
+        h+=`<text class="tm" x="${X(0)}" y="462" text-anchor="middle" font-size="14" dy="-22">0 = league average</text>`;
+        const e=ease(seg(t,6.2,7.2));
+        if(e>0){h+=`<line x1="${X(8)}" x2="${lerp(X(8),X(14),e)}" y1="448" y2="448" stroke="var(--yellow)" stroke-width="5" stroke-linecap="round"/>
+          <line x1="${X(8)}" x2="${X(8)}" y1="318" y2="392" stroke="var(--yellow)" stroke-width="3" stroke-dasharray="6 5" opacity="${e}"/>
+          <text class="ty" x="${(X(8)+X(14))/2}" y="482" text-anchor="middle" font-size="17" font-weight="800" opacity="${e}">ELITE · +8 or more · only 3 players</text>`;}
+        const hl=seg(t,4,4.6);
+        sorted.forEach((d,i)=>{
+          const a=ease(seg(t,.4+i*.045,.4+i*.045+.6)); if(a<=0) return;
+          const x=X(d.g), yT=312-d.stack*15, y=lerp(40,yT,a), isH=d.n in HL;
+          const r=isH?lerp(6.5,9,hl):6.5;
+          h+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${colorFor(d.g)}" stroke="${isH&&hl>0?"#fff":"var(--navy)"}" stroke-width="${isH&&hl>0?2.5:1.5}" opacity="${isH||hl===0?a:lerp(1,.55,hl)}"/>`;
+        });
+        sorted.filter(d=>d.n in HL).forEach((d,j)=>{
+          const o=seg(t,4+j*.35,4.6+j*.35); if(o<=0) return;
+          const x=X(d.g), ly=HL[d.n], yT=312-d.stack*15;
+          const col=d.g>=8?"var(--yellow)":"var(--ink)";
+          h+=`<g opacity="${o}"><line x1="${x}" x2="${x}" y1="${ly+12}" y2="${yT-11}" stroke="var(--line)" stroke-width="1.5"/>
+            <text x="${x}" y="${ly-20}" text-anchor="middle" font-size="26" font-weight="800" style="fill:${col};font-family:var(--sans)">${f1(d.g)}</text>
+            <text class="t" x="${x}" y="${ly+4}" text-anchor="middle" font-size="15">${esc(d.n)} (${d.t})</text></g>`;
+        });
+        const s=seg(t,5.6,6.2);
+        if(s>0) h+=`<text class="tg" x="${X(0)}" y="${HL["Breanna Stewart"]-52}" text-anchor="middle" font-size="14" font-style="italic" opacity="${s}">scores 20 PPG, but average pull</text>`;
+        return h;
+      };
+    })();
+
+    // ---------- scene 5: gravity vs points ----------
+    const s5 = (()=>{
+      const X=p=>110+(p-2)/25*820, Y=g=>80+(15-g)/24*390;
+      const order=[...P].sort((a,b)=>a.p-b.p);
+      const LB={"Marina Mabrey":[14,-6,"start"],"Sonia Citron":[-14,-6,"end"],"Breanna Stewart":[14,18,"start"],
+        "A'ja Wilson":[-14,-24,"end"],"Aliyah Boston":[14,18,"start"],"Jordin Canada":[-14,5,"end"]};
+      return t=>{
+        let h="";
+        for(let g=-5;g<=15;g+=5) h+=`<line x1="110" x2="930" y1="${Y(g)}" y2="${Y(g)}" stroke="rgba(255,255,255,${g===0?.4:.1})" stroke-width="${g===0?2:1}"/><text class="tm" x="98" y="${Y(g)+5}" text-anchor="end" font-size="13">${g>0?"+"+g:g}</text>`;
+        for(let p=5;p<=25;p+=5) h+=`<line x1="${X(p)}" x2="${X(p)}" y1="80" y2="470" stroke="rgba(255,255,255,.1)"/><text class="tm" x="${X(p)}" y="492" text-anchor="middle" font-size="13">${p}</text>`;
+        h+=`<text class="tm" x="520" y="526" text-anchor="middle" font-size="14">Points per game →</text>`;
+        h+=`<text class="tm" x="28" y="275" text-anchor="middle" font-size="14" transform="rotate(-90 28 275)">Gravity (pull) →</text>`;
+        // trend line
+        const l=ease(seg(t,3.6,5)), p0=3, p1=27, pe=lerp(p0,p1,l);
+        if(l>0){
+          const sh=seg(t,5,5.6);
+          h+=`<polygon points="${X(p0)},80 ${X(p1)},80 ${X(p1)},${Y(fit.m*p1+fit.b)} ${X(p0)},${Y(fit.m*p0+fit.b)}" fill="var(--yellow)" opacity="${.07*sh}"/>`;
+          h+=`<line x1="${X(p0)}" y1="${Y(fit.m*p0+fit.b)}" x2="${X(pe)}" y2="${Y(fit.m*pe+fit.b)}" stroke="var(--muted)" stroke-width="2" stroke-dasharray="8 6"/>`;
+          h+=`<text class="ty" x="130" y="108" font-size="15" font-weight="600" opacity="${sh}">Above the line: more pull than her points suggest</text>`;
+          h+=`<text class="tb" x="925" y="${Y(-4.4)}" text-anchor="end" font-size="15" font-weight="600" opacity="${sh}">Below the line:<tspan x="925" dy="18">less pull than her points suggest</tspan></text>`;
+        }
+        const dim=seg(t,6,6.6);
+        order.forEach((d,i)=>{
+          const a=ease(seg(t,.4+i*.035,.4+i*.035+.5)); if(a<=0) return;
+          const isL=d.n in LB;
+          h+=`<circle cx="${X(d.p)}" cy="${Y(d.g)}" r="${(isL?lerp(6.5,9,dim):6.5)*a}" fill="${colorFor(d.g)}" stroke="${isL&&dim>0?"#fff":"var(--navy)"}" stroke-width="${isL&&dim>0?2.5:1.5}" opacity="${isL?1:lerp(1,.45,dim)}"/>`;
+        });
+        Object.keys(LB).forEach((n,j)=>{
+          const o=seg(t,6.2+j*.45,6.8+j*.45); if(o<=0) return;
+          const d=P.find(q=>q.n===n), [dx,dy,an]=LB[n];
+          h+=`<g opacity="${o}"><text class="t" x="${X(d.p)+dx}" y="${Y(d.g)+dy}" text-anchor="${an}" font-size="14" font-weight="600">${esc(n)}</text>
+            <text class="tm" x="${X(d.p)+dx}" y="${Y(d.g)+dy+16}" text-anchor="${an}" font-size="12">${d.p} PPG · ${f1(d.g)}</text></g>`;
+        });
+        return h;
+      };
+    })();
+
+    // ---------- scenes ----------
+    const SCENES=[
+      {short:"On the ball",eye:"1 · On the ball",title:"What Gravity measures",dur:9.5,court:true,draw:s1,
+       text:"Gravity measures how far defenders shift toward a player, compared with what a typical player in the same spot would draw. Here a top shooter has the ball. Her own defender crowds her, and the helpers leave their players to shade her way. That pull is her Gravity.",
+       note:"+13.0 is Marina Mabrey's 2026 season average, the highest in the league."},
+      {short:"Off the ball",eye:"2 · Off the ball",title:"She pulls even without the ball",dur:10,court:true,draw:s2,
+       text:"With the ball on the other side, her defender should drop into the lane to help. Instead she stays glued to the shooter, and another helper cheats over too. That leaves a driving lane for her teammate.",
+       note:"+13.9 is Mabrey's off-ball perimeter Gravity for 2026."},
+      {short:"Cold",eye:"3 · Below zero",title:"When the defense relaxes",dur:9,court:true,draw:s3,
+       text:"If the defense doesn't fear a player, it does the opposite. Her defender sags off to clog the paint and dares her to shoot, and everyone else stays home on their own player. A negative number means less pull than an average player in that spot.",
+       note:"−7.1 is Jordin Canada's 2026 season average, the lowest of the 69 players."},
+      {short:"The scale",eye:"4 · The whole league",title:"The Gravity scale",dur:10,court:false,draw:s4,
+       text:"All 69 players with at least 15 games, placed by their 2026 season average. Most sit within a few points of zero. Only Marina Mabrey, Sonia Citron and Rhyne Howard reach the elite zone of +8 or more.",
+       note:""},
+      {short:"Points vs pull",eye:"5 · Scoring vs pull",title:"Points are not the same as pull",dur:11.5,court:false,draw:s5,
+       text:"Players who score more tend to pull more, but the link is loose (correlation 0.44). Breanna Stewart scores 20.2 a game with average pull, and Aliyah Boston scores 17.1 with well below average pull. Marina Mabrey draws far more attention than her scoring alone predicts.",
+       note:"Dashed line: the trend of Gravity against points per game."}
+    ];
+
+    // ---------- player ----------
+    const reduce=window.matchMedia&&matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const $=id=>document.getElementById(id);
+    const court=$("court"), dyn=$("dyn"), playBtn=$("play"), chips=$("chips");
+    court.innerHTML=courtSVG();
+    let scene=0, t=0, playing=!reduce, last=null;
+
+    SCENES.forEach((s,i)=>{
+      const b=document.createElement("button");
+      b.className="chip"; b.id="chip"+i; b.type="button";
+      b.innerHTML=`<span>Scene ${i+1}</span><b>${s.short}</b><i class="fill"></i>`;
+      b.onclick=()=>go(i);
+      chips.appendChild(b);
+    });
+
+    function setCaption(){
+      const s=SCENES[scene];
+      $("capEye").textContent=s.eye; $("capTitle").textContent=s.title;
+      $("capText").textContent=s.text; $("capNote").textContent=s.note;
+      court.style.display=s.court?"":"none";
+      [...chips.children].forEach((c,i)=>c.setAttribute("aria-current",i===scene?"true":"false"));
+    }
+    function go(i){scene=clamp(i,0,SCENES.length-1); t=reduce?SCENES[scene].dur:0; if(!reduce) playing=true; setCaption(); updateBtn(); render();}
+    function updateBtn(){
+      const end=scene===SCENES.length-1&&t>=SCENES[scene].dur;
+      playBtn.textContent=playing?"Pause":(end?"Replay":"Play");
+    }
+    function render(){
+      dyn.innerHTML=SCENES[scene].draw(t);
+      [...chips.children].forEach((c,i)=>{c.querySelector(".fill").style.width=(i<scene?100:i>scene?0:100*clamp(t/SCENES[scene].dur))+"%";});
+    }
+    function tick(now){
+      if(last!==null&&playing){
+        t+=Math.min(.1,(now-last)/1000);
+        if(t>=SCENES[scene].dur){
+          if(scene<SCENES.length-1){scene++;t=0;setCaption();}
+          else{t=SCENES[scene].dur;playing=false;updateBtn();}
+        }
+        render();
+      }
+      last=now; requestAnimationFrame(tick);
+    }
+    playBtn.onclick=()=>{
+      const end=scene===SCENES.length-1&&t>=SCENES[scene].dur;
+      if(end){go(0);return;}
+      if(reduce&&!playing){t=0;}
+      playing=!playing; updateBtn();
+    };
+    $("prev").onclick=()=>go(scene-1);
+    $("next").onclick=()=>go(scene+1);
+    document.addEventListener("keydown",e=>{
+      if(e.target.closest&&e.target.closest("button")&&e.key===" ") return;
+      if(e.key===" "){e.preventDefault();playBtn.click();}
+      if(e.key==="ArrowRight") go(scene+1);
+      if(e.key==="ArrowLeft") go(scene-1);
+    });
+
+    if(reduce) t=SCENES[0].dur;
+    setCaption(); updateBtn(); render(); requestAnimationFrame(tick);
+</script>
+
+</body></html>
